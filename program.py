@@ -5,27 +5,31 @@ import numpy as np
 import requests
 
 
-class Image:
+class Image(np.ndarray):
     suffix = '_o'
 
-    def __init__(self, array: np.ndarray):
-        self.array = array
+    def __new__(cls, array: np.ndarray):
+        obj = np.asarray(array).view(cls)
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
 
     @property
     def height(self):
-        return self.array.shape[0]
+        return self.shape[0]
 
     @property
     def width(self):
-        return self.array.shape[1]
+        return self.shape[1]
 
     @classmethod
     def combine(cls, image1, image2):
         new_image_height = max(image1.height, image2.height)
         new_image_width = image1.width + image2.width
         array = np.zeros((new_image_height, new_image_width), np.uint8)
-        array[:image1.height, :image1.width] = image1.array
-        array[:image2.height, image1.width:new_image_width] = image2.array
+        array[:image1.height, :image1.width] = image1[:, :]
+        array[:image2.height, image1.width:new_image_width] = image2[:, :]
         return Image(array)
 
     @classmethod
@@ -42,18 +46,21 @@ class Image:
 class ProcessedImage(Image):
     suffix = '_p'
 
-    def __init__(self, array, origin_image=None):
-        self.array = array
-        self.origin = origin_image
-
 
 class CombinedImage(Image):
     suffix = '_b'
 
-    def __init__(self, image1, image2):
-        self.left_image = image1
-        self.right_image = image2
-        self.array = self.combine(image2, image2).array
+    def __new__(cls, image1, image2):
+        array = cls.combine(image1, image2)
+        obj = np.asarray(array).view(cls)
+        obj.left_image = image1
+        obj.right_image = image2
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.left_image = getattr(obj, 'left_image', None)
+        self.right_image = getattr(obj, 'right_image', None)
 
 
 class App:
@@ -65,7 +72,7 @@ class App:
 
     def run(self):
         image = Image.download(self.image_url)
-        cv2.imshow('image', image.array)
+        cv2.imshow('image', image)
         pressed_key = cv2.waitKey(0)
         while pressed_key != ord("q"):
             pressed_key = cv2.waitKey(0)
