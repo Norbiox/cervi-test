@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from program import Image, CombinedImage
 
 
@@ -50,3 +51,10 @@ def test_combined_image():
     assert combined_image[2, 1] == 8
     assert combined_image[1, 3] == 12
     assert combined_image[2, 3] == 0
+
+
+def test_saving_image():
+    image = Image(ARRAY1)
+    fname = image.save()
+    assert os.path.exists(fname)
+    os.remove(fname)

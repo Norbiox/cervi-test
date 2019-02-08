@@ -3,6 +3,10 @@ import argparse
 import cv2
 import numpy as np
 import requests
+from datetime import datetime
+
+
+DATETIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 
 
 class Image(np.ndarray):
@@ -42,6 +46,16 @@ class Image(np.ndarray):
             return cls(np.array([]))
         return cls(image)
 
+    def save(self):
+        filename = ''.join([
+            datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
+            self.suffix,
+            '.png'
+        ])
+        print(np.asarray(self))
+        cv2.imwrite(filename, self)
+        return filename
+
 
 class ProcessedImage(Image):
     suffix = '_p'
@@ -76,6 +90,7 @@ class App:
         pressed_key = cv2.waitKey(0)
         while pressed_key != ord("q"):
             pressed_key = cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
