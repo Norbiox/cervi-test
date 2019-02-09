@@ -43,6 +43,12 @@ def test_combining_images():
     assert combined_image[2, 3, 0] == 0
 
 
+def test_combining_colorful_and_grayscale_images():
+    combined_image = Image.combine(IMAGE1, Image(ARRAY1))
+    assert isinstance(combined_image, Image)
+    assert combined_image.shape == (4, 6, 3)
+
+
 def test_combined_image():
     combined_image = CombinedImage(IMAGE1, IMAGE2)
     assert isinstance(combined_image, CombinedImage)

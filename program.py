@@ -37,6 +37,10 @@ class Image(np.ndarray):
         new_img_width = image1.width + image2.width
         array = np.zeros((new_img_height, new_img_width, image1.shape[2]),
                          np.uint8)
+        if image1.ndim == 2:
+            image1 = np.expand_dims(image1, axis=2)
+        if image2.ndim == 2:
+            image2 = np.expand_dims(image2, axis=2)
         array[:image1.height, :image1.width, :] = image1[:, :, :]
         array[:image2.height, image1.width:new_img_width, :] = image2[:, :, :]
         return Image(array)
@@ -129,6 +133,7 @@ class App:
         else:
             processed_image = self.process_image(image)
             combined_image = CombinedImage(image, processed_image)
+            cv2.imshow('image', combined_image)
         pressed_key = cv2.waitKey(0)
         while pressed_key != ord('q'):
             if pressed_key == ord('o'):
