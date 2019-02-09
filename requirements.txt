@@ -1,3 +1,5 @@
+autopy
+imutils
 opencv-python
 pytest
 requests
