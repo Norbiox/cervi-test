@@ -110,3 +110,8 @@ def test_clipping_with_parameters():
     assert clipped_img[0, 0, 0] == image[1, 0, 0]
     with pytest.raises(TypeError):
         App.clip(image, [1, 4])
+
+
+# def test_clipping_without_parameters():
+#     image = IMAGE1
+#     App.clip(image, [])

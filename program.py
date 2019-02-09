@@ -6,6 +6,8 @@ import numpy as np
 import requests
 from datetime import datetime
 
+import get_coordinates
+
 
 DATETIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 
@@ -111,6 +113,8 @@ class App:
             pressed_key = cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    # Image processing methods
+
     @staticmethod
     def grayscale(image, parameters=[]):
         return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -153,13 +157,12 @@ class App:
     @staticmethod
     def clip(image, parameters=[]):
         if not parameters:
-            # TODO interactive clipping
-            return
+            x0, y0, x1, y1 = get_coordinates.main(image)
         elif len(parameters) == 4:
             x0, y0, x1, y1 = parameters
-            return image[y0:y1, x0:x1, :]
         else:
             raise TypeError("clip method takes 4 arguments: x0, y0, x1, y1")
+        return image[y0:y1, x0:x1, :]
 
 
 if __name__ == "__main__":

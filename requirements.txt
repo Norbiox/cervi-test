@@ -1,3 +1,4 @@
+autopy
 imutils
 opencv-python
 pytest
