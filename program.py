@@ -33,6 +33,7 @@ class Image(np.ndarray):
 
     @classmethod
     def combine(cls, image1, image2):
+        print(image2)
         new_img_height = max(image1.height, image2.height)
         new_img_width = image1.width + image2.width
         array = np.zeros((new_img_height, new_img_width, image1.shape[2]),
@@ -87,7 +88,7 @@ class CombinedImage(Image):
 
 
 class App:
-    options = ["grayscale", "binarize", "inverse", "rotate", "clip"]
+    options = ["grayscale", "binarize", "invert", "rotate", "clip"]
 
     def __init__(self, image_url: str, option='', parameters=[]):
         self.image_url = image_url
@@ -132,6 +133,7 @@ class App:
             cv2.imshow('image', image)
         else:
             processed_image = self.process_image(image)
+            print(processed_image)
             combined_image = CombinedImage(image, processed_image)
             cv2.imshow('image', combined_image)
         pressed_key = cv2.waitKey(0)
@@ -155,7 +157,7 @@ class App:
     def binarize(image, parameters=[]):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         if not parameters:
-            return cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+            return cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)[1]
         elif parameters[0] == 'mean':
             return cv2.adaptiveThreshold(image, 255,
                                          cv2.ADAPTIVE_THRESH_MEAN_C,
@@ -166,7 +168,7 @@ class App:
                                          cv2.THRESH_BINARY, 11, 2)
         elif parameters[0] == 'otsu':
             return cv2.threshold(image, 0, 255,
-                                 cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                                 cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
         else:
             raise ValueError(
                 f"{parameters[0]} binarization method is not known"

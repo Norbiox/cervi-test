@@ -83,10 +83,10 @@ def test_grayscale_method():
 
 def test_binarize_method():
     image = IMAGE1
-    App.binarize(image)
-    App.binarize(image, ['mean'])
-    App.binarize(image, ['gauss'])
-    App.binarize(image, ['otsu'])
+    assert App.binarize(image).ndim == 2
+    assert App.binarize(image, ['mean']) == 2
+    assert App.binarize(image, ['gauss']) == 2
+    assert App.binarize(image, ['otsu']) == 2
     with pytest.raises(ValueError):
         App.binarize(image, ['non_existing_method'])
 
