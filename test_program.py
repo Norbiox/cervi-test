@@ -26,14 +26,12 @@ def test_image_shape():
 def test_image_download():
     img = Image.download(URL)
     assert isinstance(img, Image)
-    assert isinstance(img, np.ndarray)
     assert img.size > 0
 
 
 def test_image_download_from_non_existing_url():
-    img = Image.download(URL+'s')
-    assert isinstance(img, Image)
-    assert img.shape == (0, )
+    with pytest.raises(Exception):
+        img = Image.download(URL+'s')
 
 
 def test_combining_images():
@@ -67,6 +65,7 @@ def test_app_options():
     existing_option = "grayscale"
     non_existing_option = "play_sound"
     App(URL, existing_option)
+    App(URL, '')
     with pytest.raises(ValueError):
         App(URL, non_existing_option)
 
@@ -93,11 +92,11 @@ def test_inversion():
 
 def test_rotation():
     image = IMAGE1
-    img_rot90 = App.rotate(image, [90])
+    img_rot90 = App.rotate(image, ['90'])
     assert img_rot90.shape == (3, 4, 3)
-    img_rot180 = App.rotate(image, [180])
+    img_rot180 = App.rotate(image, ['180'])
     assert img_rot180.shape == (4, 3, 3)
-    img_rot270 = App.rotate(image, [270])
+    img_rot270 = App.rotate(image, ['270'])
     assert img_rot270.shape == (3, 4, 3)
     with pytest.raises(ValueError):
         App.rotate(image, ['sdf'])
@@ -105,11 +104,11 @@ def test_rotation():
 
 def test_clipping_with_parameters():
     image = IMAGE1
-    clipped_img = App.clip(image, [0, 1, 2, 3])
+    clipped_img = App.clip(image, ['0', '1', '2', '3'])
     assert clipped_img.shape == (2, 2, 3)
     assert clipped_img[0, 0, 0] == image[1, 0, 0]
     with pytest.raises(TypeError):
-        App.clip(image, [1, 4])
+        App.clip(image, ['1', '4'])
 
 
 # def test_clipping_without_parameters():

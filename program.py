@@ -48,7 +48,7 @@ class Image(np.ndarray):
             image = np.asarray(bytearray(r.content), dtype='uint8')
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         else:
-            return cls(np.array([]))
+            r.raise_for_status()
         return cls(image)
 
     def save(self):
@@ -85,7 +85,7 @@ class CombinedImage(Image):
 class App:
     options = ["grayscale", "binarize", "inverse", "rotate", "clip"]
 
-    def __init__(self, image_url: str, option=None, parameters=[]):
+    def __init__(self, image_url: str, option='', parameters=[]):
         self.image_url = image_url
         self.option = option
         self.parameters = parameters
@@ -96,10 +96,27 @@ class App:
 
     @option.setter
     def option(self, option):
-        if option in self.options and callable(getattr(self, option)):
+        if option == '' or option in self.options:
             self._option = option
         else:
             raise ValueError(f"option {option} is not available")
+
+    @classmethod
+    def parse_arguments(cls):
+        parser = argparse.ArgumentParser(
+            description="Cervi Robotics test program"
+        )
+        parser.add_argument('URL', type=str, help="URL of image to process")
+        parser.add_argument('option', type=str, default='', nargs='?',
+                            help="name of image processing method")
+        parser.add_argument('parameters', nargs='*',
+                            help="additional parameters")
+        return parser.parse_args()
+
+    @classmethod
+    def init(cls):
+        args = cls.parse_arguments()
+        return cls(args.URL, args.option, args.parameters)
 
     def process_image(self, image):
         function = getattr(self, self.option)
@@ -107,9 +124,19 @@ class App:
 
     def run(self):
         image = Image.download(self.image_url)
-        cv2.imshow('image', image)
+        if not self.option:
+            cv2.imshow('image', image)
+        else:
+            processed_image = self.process_image(image)
+            combined_image = CombinedImage(image, processed_image)
         pressed_key = cv2.waitKey(0)
-        while pressed_key != ord("q"):
+        while pressed_key != ord('q'):
+            if pressed_key == ord('o'):
+                image.save()
+            elif pressed_key == ord('p') and self.option:
+                processed_image.save()
+            elif pressed_key == ord('b') and self.option:
+                combined_image.save()
             pressed_key = cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -148,10 +175,11 @@ class App:
     def rotate(image, parameters=[]):
         if not parameters:
             angle = 90
-        elif isinstance(parameters[0], int):
-            angle = parameters[0]
         else:
-            raise ValueError("rotation angle must be integer")
+            try:
+                angle = int(parameters[0])
+            except ValueError:
+                raise ValueError("rotation angle must be integer")
         return imutils.rotate_bound(image, angle)
 
     @staticmethod
@@ -159,16 +187,15 @@ class App:
         if not parameters:
             x0, y0, x1, y1 = get_coordinates.main(image)
         elif len(parameters) == 4:
-            x0, y0, x1, y1 = parameters
+            try:
+                x0, y0, x1, y1 = [int(p) for p in parameters]
+            except ValueError:
+                raise ValueError("clipping coordinates must be integers")
         else:
             raise TypeError("clip method takes 4 arguments: x0, y0, x1, y1")
         return image[y0:y1, x0:x1, :]
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Cervi Robotics test program")
-    parser.add_argument('URL', type=str, help="URL of image to process")
-    args = parser.parse_args()
-
-    app = App(args.URL)
+    app = App.init()
     app.run()
