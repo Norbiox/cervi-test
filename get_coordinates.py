@@ -22,9 +22,9 @@ def crop(event, x, y, flags, param):
 
 
 def main(image):
-    cv2.namedWindow('click&drag')
-    cv2.setMouseCallback('click&drag', crop)
-    cv2.imshow('click&drag', image)
+    cv2.namedWindow('click&drag to clip image')
+    cv2.setMouseCallback('click&drag to clip image', crop)
+    cv2.imshow('click&drag to clip image', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return normalize(coordinates)
