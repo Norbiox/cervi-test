@@ -31,7 +31,7 @@ def test_image_download():
 
 def test_image_download_from_non_existing_url():
     with pytest.raises(Exception):
-        img = Image.download(URL+'s')
+        Image.download(URL+'s')
 
 
 def test_combining_images():
@@ -78,22 +78,22 @@ def test_app_options():
 
 def test_grayscale_method():
     image = IMAGE1
-    App.grayscale(image)
+    assert App.grayscale(image).ndim == 2
 
 
 def test_binarize_method():
     image = IMAGE1
     assert App.binarize(image).ndim == 2
-    assert App.binarize(image, ['mean']) == 2
-    assert App.binarize(image, ['gauss']) == 2
-    assert App.binarize(image, ['otsu']) == 2
+    assert App.binarize(image, ['mean']).ndim == 2
+    assert App.binarize(image, ['gauss']).ndim == 2
+    assert App.binarize(image, ['otsu']).ndim == 2
     with pytest.raises(ValueError):
         App.binarize(image, ['non_existing_method'])
 
 
 def test_inversion():
     image = IMAGE1
-    App.invert(image, [])
+    assert App.invert(image, []).shape == image.shape
 
 
 def test_rotation():
@@ -115,8 +115,3 @@ def test_clipping_with_parameters():
     assert clipped_img[0, 0, 0] == image[1, 0, 0]
     with pytest.raises(TypeError):
         App.clip(image, ['1', '4'])
-
-
-# def test_clipping_without_parameters():
-#     image = IMAGE1
-#     App.clip(image, [])

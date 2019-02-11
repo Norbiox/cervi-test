@@ -5,6 +5,7 @@ import imutils
 import numpy as np
 import requests
 from datetime import datetime
+from typing import List
 
 import get_coordinates
 
@@ -24,16 +25,15 @@ class Image(np.ndarray):
             return
 
     @property
-    def height(self):
+    def height(self) -> int:
         return self.shape[0]
 
     @property
-    def width(self):
+    def width(self) -> int:
         return self.shape[1]
 
     @classmethod
     def combine(cls, image1, image2):
-        print(image2)
         new_img_height = max(image1.height, image2.height)
         new_img_width = image1.width + image2.width
         array = np.zeros((new_img_height, new_img_width, image1.shape[2]),
@@ -47,7 +47,7 @@ class Image(np.ndarray):
         return Image(array)
 
     @classmethod
-    def download(cls, url):
+    def download(cls, url: str):
         r = requests.get(url, stream=True)
         if r.status_code == 200:
             image = np.asarray(bytearray(r.content), dtype='uint8')
@@ -56,7 +56,7 @@ class Image(np.ndarray):
             r.raise_for_status()
         return cls(image)
 
-    def save(self):
+    def save(self) -> str:
         filename = ''.join([
             datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
             self.suffix,
@@ -90,24 +90,25 @@ class CombinedImage(Image):
 class App:
     options = ["grayscale", "binarize", "invert", "rotate", "clip"]
 
-    def __init__(self, image_url: str, option='', parameters=[]):
+    def __init__(self, image_url: str, option: str = '',
+                 parameters: List[str] = []):
         self.image_url = image_url
         self.option = option
         self.parameters = parameters
 
     @property
-    def option(self):
+    def option(self) -> str:
         return self._option
 
     @option.setter
-    def option(self, option):
+    def option(self, option: str):
         if option == '' or option in self.options:
             self._option = option
         else:
             raise ValueError(f"option {option} is not available")
 
     @classmethod
-    def parse_arguments(cls):
+    def parse_arguments(cls) -> argparse.Namespace:
         parser = argparse.ArgumentParser(
             description="Cervi Robotics test program"
         )
@@ -123,11 +124,11 @@ class App:
         args = cls.parse_arguments()
         return cls(args.URL, args.option, args.parameters)
 
-    def process_image(self, image):
+    def process_image(self, image: Image) -> ProcessedImage:
         function = getattr(self, self.option)
         return ProcessedImage(function(image, self.parameters))
 
-    def run(self):
+    def run(self) -> None:
         image = Image.download(self.image_url)
         if not self.option:
             cv2.imshow('image', image)
@@ -150,11 +151,11 @@ class App:
     # Image processing methods
 
     @staticmethod
-    def grayscale(image, parameters=[]):
+    def grayscale(image: Image, parameters: List[str] = []) -> np.array:
         return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     @staticmethod
-    def binarize(image, parameters=[]):
+    def binarize(image: Image, parameters: List[str] = []) -> np.array:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         if not parameters:
             return cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)[1]
@@ -175,11 +176,11 @@ class App:
             )
 
     @staticmethod
-    def invert(image, parameters=[]):
+    def invert(image: Image, parameters: List[str] = []) -> np.array:
         return cv2.bitwise_not(image)
 
     @staticmethod
-    def rotate(image, parameters=[]):
+    def rotate(image: Image, parameters: List[str] = []) -> np.array:
         if not parameters:
             angle = 90
         else:
@@ -190,7 +191,7 @@ class App:
         return imutils.rotate_bound(image, angle)
 
     @staticmethod
-    def clip(image, parameters=[]):
+    def clip(image: Image, parameters: List[str] = []) -> np.array:
         if not parameters:
             x0, y0, x1, y1 = get_coordinates.main(image)
         elif len(parameters) == 4:
