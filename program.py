@@ -133,11 +133,11 @@ class App:
     def run(self) -> None:
         image = Image.download(self.image_url)
         if not self.option:
-            cv2.imshow('image', image)
+            cv2.imshow(f'Image from {self.image_url}', image)
         else:
             processed_image = self.process_image(image)
             combined_image = CombinedImage(image, processed_image)
-            cv2.imshow('image', combined_image)
+            cv2.imshow(f'Image from {self.image_url}', combined_image)
         pressed_key = cv2.waitKey(0)
         while pressed_key != ord('q'):
             if pressed_key == ord('o'):

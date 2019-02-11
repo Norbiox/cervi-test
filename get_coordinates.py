@@ -2,7 +2,8 @@
 import autopy
 import cv2
 
-
+image = None
+clipping = False
 coordinates = []
 
 
@@ -13,18 +14,28 @@ def normalize(c):
 
 
 def crop(event, x, y, flags, param):
-    global coordinates
+    global clipping, coordinates
     if event == cv2.EVENT_LBUTTONDOWN:
         coordinates = [x, y]
+        clipping = True
     elif event == cv2.EVENT_LBUTTONUP:
         coordinates += [x, y]
+        clipping = False
         autopy.key.type_string('x')
+    elif clipping:
+        img = image.copy()
+        cv2.rectangle(img, (coordinates[0], coordinates[1]),
+                      (x,y), (0, 255, 0), 2)
+        cv2.imshow('click&drag to clip image', img)
 
 
-def main(image):
-    cv2.namedWindow('click&drag')
-    cv2.setMouseCallback('click&drag', crop)
-    cv2.imshow('click&drag', image)
+def main(img):
+    global image
+    image = img.copy()
+    cv2.namedWindow('click&drag to clip image')
+    cv2.setMouseCallback('click&drag to clip image', crop)
+    cv2.imshow('click&drag to clip image', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return normalize(coordinates)
+
