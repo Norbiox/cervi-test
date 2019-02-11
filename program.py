@@ -52,6 +52,8 @@ class Image(np.ndarray):
         if r.status_code == 200:
             image = np.asarray(bytearray(r.content), dtype='uint8')
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+            if image is None:
+                raise Exception("Cannot download any image from given url")
         else:
             r.raise_for_status()
         return cls(image)
@@ -134,7 +136,6 @@ class App:
             cv2.imshow('image', image)
         else:
             processed_image = self.process_image(image)
-            print(processed_image)
             combined_image = CombinedImage(image, processed_image)
             cv2.imshow('image', combined_image)
         pressed_key = cv2.waitKey(0)

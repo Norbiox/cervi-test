@@ -115,3 +115,9 @@ def test_clipping_with_parameters():
     assert clipped_img[0, 0, 0] == image[1, 0, 0]
     with pytest.raises(TypeError):
         App.clip(image, ['1', '4'])
+
+
+def test_run_application_against_url_with_no_image():
+    app = App('http://google.com')
+    with pytest.raises(Exception):
+        app.run()
