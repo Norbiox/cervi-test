@@ -44,6 +44,12 @@ After that program will download a picture from recource, perform a operation on
 
 NOTE: if you'll run program without giving any option, program will show you only original picture and you'll be able to save it.
 
+**Example:**
+
+    python program.py https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png binarize mean
+
+Running above command in terminal will result downloading 'Lenna' image from wikimedia.org, binarizing it and displaying on screen both original and binarized pictures in one.
+
 ### Available processing options
 
 | option name | parameters | description |
